@@ -3,12 +3,100 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
+  <title>Document Cross-Examination &amp; Discrepancy Analyzer</title>
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
+  <header class="app-header">
+    <h1>Document Cross-Examination &amp; Discrepancy Analyzer</h1>
+    <p class="subtitle">
+      Mechanically compares multiple documents to surface numerical discrepancies,
+      timeline shifts, and semantic contradictions &mdash; with verbatim citations.
+      No legal conclusions are drawn.
+    </p>
+  </header>
+
+  <main>
+    <section class="panel" id="setup-panel">
+      <h2>1. API Key</h2>
+      <p class="hint">
+        Your Claude API key is used only to call the Anthropic API directly from your
+        browser and is stored solely in this browser's local storage. It is never sent
+        anywhere else.
+      </p>
+      <div class="field-row">
+        <label for="api-key">Anthropic API Key</label>
+        <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off" />
+        <button type="button" id="save-key-btn">Save</button>
+        <button type="button" id="clear-key-btn" class="secondary">Clear</button>
+      </div>
+      <p class="key-status" id="key-status"></p>
+    </section>
+
+    <section class="panel" id="documents-panel">
+      <h2>2. Documents</h2>
+      <p class="hint">
+        Add each document being compared. Paste its full text, or upload a plain text
+        (.txt) file. Give each one a clear name (e.g. "Deposition Transcript, p. 12" or
+        "Incident Report #4471") so citations in the results are unambiguous.
+      </p>
+      <div id="documents-list"></div>
+      <button type="button" id="add-document-btn">+ Add Document</button>
+    </section>
+
+    <section class="panel" id="analyze-panel">
+      <h2>3. Analyze</h2>
+      <div class="field-row">
+        <button type="button" id="analyze-btn">Analyze Documents</button>
+        <span id="analyze-status" class="status-text"></span>
+      </div>
+      <div id="error-box" class="error-box" hidden></div>
+    </section>
+
+    <section class="panel" id="results-panel" hidden>
+      <h2>Results</h2>
+
+      <div class="results-summary" id="results-summary"></div>
+
+      <h3>Timeline</h3>
+      <div class="table-wrap">
+        <table id="timeline-table">
+          <thead>
+            <tr>
+              <th>Date / Time</th>
+              <th>Event</th>
+              <th>Source Document</th>
+              <th>Citation</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="empty-note" id="timeline-empty" hidden>No dated events were identified.</p>
+
+      <h3>Discrepancies</h3>
+      <div id="discrepancies-list"></div>
+      <p class="empty-note" id="discrepancies-empty" hidden>No discrepancies were detected.</p>
+
+      <details class="raw-json-details">
+        <summary>Raw JSON output</summary>
+        <pre id="raw-json"></pre>
+      </details>
+    </section>
+  </main>
+
+  <template id="document-item-template">
+    <div class="document-item">
+      <div class="field-row">
+        <label>Document Name</label>
+        <input type="text" class="doc-name" placeholder="e.g. Contract v2, Exhibit A" />
+        <input type="file" class="doc-file" accept=".txt,text/plain" />
+        <button type="button" class="remove-document-btn secondary">Remove</button>
+      </div>
+      <textarea class="doc-text" rows="8" placeholder="Paste the document text here..."></textarea>
+    </div>
+  </template>
+
   <script defer type="text/javascript" src="/main.js"></script>
 </body>
 </html>
