@@ -1,85 +1,86 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document Cross-Examination &amp; Discrepancy Analyzer</title>
+  <title>문서 교차 분석 AI 엔진</title>
   <link href='/style.css' rel='stylesheet'>
 </head>
 <body>
   <header class="app-header">
-    <h1>Document Cross-Examination &amp; Discrepancy Analyzer</h1>
+    <h1>문서 교차 분석 AI 엔진</h1>
     <p class="subtitle">
-      Mechanically compares multiple documents to surface numerical discrepancies,
-      timeline shifts, and semantic contradictions &mdash; with verbatim citations.
-      No legal conclusions are drawn.
+      다중 문서 간의 사실관계 교차 검증 및 모순 탐지를 전문으로 수행합니다.
+      진술서, 준비서면, 증거 자료 등을 정밀 대조하여 서술의 불일치, 수치 왜곡,
+      시계열 모순, 진술 번복(의미 축소/변형)을 기계적이고 객관적으로 적발합니다.
+      법적 판단은 내리지 않습니다.
     </p>
   </header>
 
   <main>
     <section class="panel" id="setup-panel">
-      <h2>1. API Key</h2>
+      <h2>1. API 키</h2>
       <p class="hint">
-        Your Claude API key is used only to call the Anthropic API directly from your
-        browser and is stored solely in this browser's local storage. It is never sent
-        anywhere else.
+        입력하신 Claude API 키는 브라우저에서 Anthropic API를 직접 호출하는 데만
+        사용되며, 이 브라우저의 로컬 저장소에만 보관됩니다. 다른 어디로도 전송되지
+        않습니다.
       </p>
       <div class="field-row">
-        <label for="api-key">Anthropic API Key</label>
+        <label for="api-key">Anthropic API 키</label>
         <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off" />
-        <button type="button" id="save-key-btn">Save</button>
-        <button type="button" id="clear-key-btn" class="secondary">Clear</button>
+        <button type="button" id="save-key-btn">저장</button>
+        <button type="button" id="clear-key-btn" class="secondary">삭제</button>
       </div>
       <p class="key-status" id="key-status"></p>
     </section>
 
     <section class="panel" id="documents-panel">
-      <h2>2. Documents</h2>
+      <h2>2. 문서</h2>
       <p class="hint">
-        Add each document being compared. Paste its full text, or upload a plain text
-        (.txt) file. Give each one a clear name (e.g. "Deposition Transcript, p. 12" or
-        "Incident Report #4471") so citations in the results are unambiguous.
+        대조할 각 문서를 추가하세요. 전체 원문을 붙여넣거나 일반 텍스트(.txt)
+        파일을 업로드할 수 있습니다. 결과의 인용이 명확하도록 각 문서에 알아보기
+        쉬운 이름을 붙여 주세요 (예: "진술서(2024.3.2)", "준비서면 1", "증거 자료 4호").
       </p>
       <div id="documents-list"></div>
-      <button type="button" id="add-document-btn">+ Add Document</button>
+      <button type="button" id="add-document-btn">+ 문서 추가</button>
     </section>
 
     <section class="panel" id="analyze-panel">
-      <h2>3. Analyze</h2>
+      <h2>3. 분석</h2>
       <div class="field-row">
-        <button type="button" id="analyze-btn">Analyze Documents</button>
+        <button type="button" id="analyze-btn">문서 분석하기</button>
         <span id="analyze-status" class="status-text"></span>
       </div>
       <div id="error-box" class="error-box" hidden></div>
     </section>
 
     <section class="panel" id="results-panel" hidden>
-      <h2>Results</h2>
+      <h2>분석 결과</h2>
 
       <div class="results-summary" id="results-summary"></div>
 
-      <h3>Timeline</h3>
+      <h3>시계열</h3>
       <div class="table-wrap">
         <table id="timeline-table">
           <thead>
             <tr>
-              <th>Date / Time</th>
-              <th>Event</th>
-              <th>Source Document</th>
-              <th>Citation</th>
+              <th>일자 / 시각</th>
+              <th>사건</th>
+              <th>출처 문서</th>
+              <th>인용</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-      <p class="empty-note" id="timeline-empty" hidden>No dated events were identified.</p>
+      <p class="empty-note" id="timeline-empty" hidden>확인된 일자/사건이 없습니다.</p>
 
-      <h3>Discrepancies</h3>
+      <h3>불일치 사항</h3>
       <div id="discrepancies-list"></div>
-      <p class="empty-note" id="discrepancies-empty" hidden>No discrepancies were detected.</p>
+      <p class="empty-note" id="discrepancies-empty" hidden>적발된 불일치 사항이 없습니다.</p>
 
       <details class="raw-json-details">
-        <summary>Raw JSON output</summary>
+        <summary>원본 JSON 출력</summary>
         <pre id="raw-json"></pre>
       </details>
     </section>
@@ -88,12 +89,12 @@
   <template id="document-item-template">
     <div class="document-item">
       <div class="field-row">
-        <label>Document Name</label>
-        <input type="text" class="doc-name" placeholder="e.g. Contract v2, Exhibit A" />
+        <label>문서명</label>
+        <input type="text" class="doc-name" placeholder="예: 진술서(2024.3.2), 준비서면 1" />
         <input type="file" class="doc-file" accept=".txt,text/plain" />
-        <button type="button" class="remove-document-btn secondary">Remove</button>
+        <button type="button" class="remove-document-btn secondary">삭제</button>
       </div>
-      <textarea class="doc-text" rows="8" placeholder="Paste the document text here..."></textarea>
+      <textarea class="doc-text" rows="8" placeholder="여기에 문서 원문을 붙여넣으세요..."></textarea>
     </div>
   </template>
 

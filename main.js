@@ -7,68 +7,68 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const API_KEY_STORAGE_KEY = 'discrepancy-analyzer.anthropic-api-key';
 
-const SYSTEM_PROMPT = `You are a meticulous "Document Cross-Examination and Discrepancy Analyzer."
-Your sole purpose is to compare multiple legal, administrative, or factual documents and mechanically detect inconsistencies, numerical discrepancies, timeline shifts, and semantic contradictions.
+const SYSTEM_PROMPT = `당신은 다중 문서 간의 사실관계 교차 검증 및 모순 탐지를 전문으로 수행하는 '문서 교차 분석 AI 엔진'입니다.
+제공된 여러 건의 진술서, 준비서면, 증거 자료 등을 정밀 대조하여 서술의 불일치, 수치 왜곡, 시계열 모순, 진술 번복(의미 축소/변형)을 기계적이고 객관적으로 적발합니다.
 
-[STRICT GUIDELINES]
-1. Zero Legal Advice: Never provide legal conclusions (e.g., do not say "This is perjury" or "This constitutes fraud"). State only objective discrepancies (e.g., "Document A states X, whereas Document B states Y").
-2. Evidence Grounding: Every detected discrepancy must cite exact document names, section/page numbers, and verbatim quotes. Do not extrapolate or assume unstated facts.
-3. Chronological Anchoring: Map all mentioned dates, times, and events onto an absolute timeline.
-4. Output Format: You must output ONLY valid JSON matching the provided schema, with no conversational filler.
+[절대 준수 원칙]
+1. 법적 판단 금지: "이는 사기죄에 해당함", "명백한 위증임"과 같은 법적 단정을 절대 내리지 마십시오. 철저히 사실관계의 불일치(예: "문서 A에서는 X라고 명시했으나, 문서 B에서는 Y라고 번복함")만을 서술하십시오.
+2. 엄격한 근거 기반(Grounding): 모든 모순 지적은 반드시 해당 문서명, 원문 인용(verbatim quote), 페이지/단락 정보를 포함해야 합니다. 문서에 없는 내용을 추측하거나 지어내지 마십시오.
+3. 시계열 재구성: 문서에 등장하는 모든 사건 발생일, 작성일, 진술일을 절대적 시간 순서로 정렬하여 모순을 파악하십시오.
+4. 출력 형식: 대화형 설명이나 인사말 없이 지정된 JSON 포맷으로만 응답하십시오.
 
-You must call the "report_discrepancy_analysis" tool exactly once with your complete findings. Do not include any prose outside the tool call.`;
+반드시 "report_discrepancy_analysis" 도구를 정확히 한 번 호출하여 분석 결과 전체를 전달하십시오. 도구 호출 외의 어떠한 설명 텍스트도 포함하지 마십시오.`;
 
 const RESULT_SCHEMA = {
   type: 'object',
   properties: {
     documents: {
       type: 'array',
-      description: 'Every document that was analyzed.',
+      description: '분석 대상이 된 모든 문서.',
       items: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: 'Exact document name as provided.' },
-          summary: { type: 'string', description: 'One neutral sentence describing what the document is, with no interpretation.' }
+          name: { type: 'string', description: '제공된 그대로의 정확한 문서명.' },
+          summary: { type: 'string', description: '해석을 배제한, 문서 성격에 대한 한 문장의 중립적 설명.' }
         },
         required: ['name']
       }
     },
     timeline: {
       type: 'array',
-      description: 'Every date/time and associated event mentioned across all documents, mapped onto an absolute timeline.',
+      description: '모든 문서에 등장하는 일자/시각과 관련 사건을 절대적 시간 순서로 정렬한 항목.',
       items: {
         type: 'object',
         properties: {
-          date: { type: 'string', description: 'The date/time exactly as it can be resolved (ISO 8601 where possible, otherwise as stated).' },
-          event: { type: 'string', description: 'Objective description of the event.' },
-          source_document: { type: 'string', description: 'Exact name of the document this event was taken from.' },
-          location: { type: 'string', description: 'Section/page/paragraph reference within the source document.' },
-          quote: { type: 'string', description: 'Verbatim quote supporting this timeline entry.' }
+          date: { type: 'string', description: '가능한 경우 ISO 8601 형식, 그렇지 않으면 문서에 기재된 그대로의 일자/시각.' },
+          event: { type: 'string', description: '사건에 대한 객관적 서술.' },
+          source_document: { type: 'string', description: '해당 사건의 출처가 된 정확한 문서명.' },
+          location: { type: 'string', description: '출처 문서 내 조항/페이지/단락 정보.' },
+          quote: { type: 'string', description: '이 시계열 항목을 뒷받침하는 원문 그대로의 인용.' }
         },
         required: ['date', 'event', 'source_document', 'quote']
       }
     },
     discrepancies: {
       type: 'array',
-      description: 'Every detected inconsistency between documents.',
+      description: '문서 간 적발된 모든 불일치 사항.',
       items: {
         type: 'object',
         properties: {
           type: {
             type: 'string',
             enum: ['numerical', 'date_time', 'factual', 'semantic', 'other'],
-            description: 'Category of discrepancy.'
+            description: '불일치 유형: numerical(수치 왜곡), date_time(시계열 모순), factual(서술의 불일치), semantic(진술 번복/의미 축소·변형), other(기타).'
           },
           description: {
             type: 'string',
-            description: 'Objective, non-legal statement of the discrepancy, e.g. "Document A states X, whereas Document B states Y."'
+            description: '법적 판단을 배제한 객관적 불일치 서술. 예: "문서 A에서는 X라고 명시했으나, 문서 B에서는 Y라고 번복함."'
           },
           document_a: {
             type: 'object',
             properties: {
               name: { type: 'string' },
-              location: { type: 'string', description: 'Section/page number.' },
-              quote: { type: 'string', description: 'Verbatim quote.' }
+              location: { type: 'string', description: '조항/페이지 번호.' },
+              quote: { type: 'string', description: '원문 그대로의 인용.' }
             },
             required: ['name', 'location', 'quote']
           },
@@ -76,8 +76,8 @@ const RESULT_SCHEMA = {
             type: 'object',
             properties: {
               name: { type: 'string' },
-              location: { type: 'string', description: 'Section/page number.' },
-              quote: { type: 'string', description: 'Verbatim quote.' }
+              location: { type: 'string', description: '조항/페이지 번호.' },
+              quote: { type: 'string', description: '원문 그대로의 인용.' }
             },
             required: ['name', 'location', 'quote']
           }
@@ -95,6 +95,14 @@ const RESULT_SCHEMA = {
     }
   },
   required: ['documents', 'timeline', 'discrepancies', 'summary']
+};
+
+const DISCREPANCY_TYPE_LABELS = {
+  numerical: '수치 왜곡',
+  date_time: '시계열 모순',
+  factual: '서술의 불일치',
+  semantic: '진술 번복',
+  other: '기타'
 };
 
 const documentsListEl = document.getElementById('documents-list');
@@ -146,7 +154,7 @@ function addDocumentRow(name = '', text = '') {
       textArea.value = String(reader.result || '');
     };
     reader.onerror = () => {
-      showError(`Could not read file "${file.name}".`);
+      showError(`"${file.name}" 파일을 읽을 수 없습니다.`);
     };
     reader.readAsText(file);
   });
@@ -182,7 +190,7 @@ function loadStoredKey() {
     const stored = localStorage.getItem(API_KEY_STORAGE_KEY);
     if (stored) {
       apiKeyInput.value = stored;
-      keyStatusEl.textContent = 'Using a saved API key from this browser.';
+      keyStatusEl.textContent = '이 브라우저에 저장된 API 키를 사용합니다.';
     }
   } catch (e) {
     // localStorage unavailable; ignore.
@@ -192,14 +200,14 @@ function loadStoredKey() {
 saveKeyBtn.addEventListener('click', () => {
   const key = apiKeyInput.value.trim();
   if (!key) {
-    keyStatusEl.textContent = 'Enter an API key before saving.';
+    keyStatusEl.textContent = '저장하기 전에 API 키를 입력하세요.';
     return;
   }
   try {
     localStorage.setItem(API_KEY_STORAGE_KEY, key);
-    keyStatusEl.textContent = 'API key saved in this browser.';
+    keyStatusEl.textContent = '이 브라우저에 API 키가 저장되었습니다.';
   } catch (e) {
-    keyStatusEl.textContent = 'Could not save key (local storage unavailable). It will still be used for this session.';
+    keyStatusEl.textContent = '키를 저장할 수 없습니다(로컬 저장소 사용 불가). 이번 세션 동안은 계속 사용됩니다.';
   }
 });
 
@@ -210,7 +218,7 @@ clearKeyBtn.addEventListener('click', () => {
   } catch (e) {
     // ignore
   }
-  keyStatusEl.textContent = 'API key cleared.';
+  keyStatusEl.textContent = 'API 키가 삭제되었습니다.';
 });
 
 addDocumentBtn.addEventListener('click', () => addDocumentRow());
@@ -227,14 +235,14 @@ function clearError() {
 
 function setAnalyzing(isAnalyzing) {
   analyzeBtn.disabled = isAnalyzing;
-  analyzeStatusEl.textContent = isAnalyzing ? 'Analyzing documents…' : '';
+  analyzeStatusEl.textContent = isAnalyzing ? '문서를 분석하는 중…' : '';
 }
 
 function buildUserMessage(docs) {
   const parts = docs.map((doc, i) => {
-    return `--- DOCUMENT ${i + 1}: ${doc.name || `(Unnamed Document ${i + 1})`} ---\n${doc.text}`;
+    return `--- 문서 ${i + 1}: ${doc.name || `(문서 ${i + 1}, 이름 없음)`} ---\n${doc.text}`;
   });
-  return `Compare the following ${docs.length} documents and detect all discrepancies per your instructions.\n\n${parts.join('\n\n')}`;
+  return `다음 ${docs.length}개 문서를 대조하여 지침에 따라 모든 불일치 사항을 적발하십시오.\n\n${parts.join('\n\n')}`;
 }
 
 async function callClaude(apiKey, docs) {
@@ -280,7 +288,7 @@ async function callClaude(apiKey, docs) {
   const data = await response.json();
   const toolUse = (data.content || []).find((block) => block.type === 'tool_use');
   if (!toolUse) {
-    throw new Error('The model did not return structured results. Please try again.');
+    throw new Error('모델이 구조화된 결과를 반환하지 않았습니다. 다시 시도해 주세요.');
   }
   return toolUse.input;
 }
@@ -291,8 +299,8 @@ function renderResults(result) {
   const docCount = result.summary?.documents_analyzed ?? (result.documents || []).length;
   const discCount = result.summary?.discrepancies_found ?? (result.discrepancies || []).length;
   resultsSummaryEl.innerHTML =
-    `<strong>${escapeHtml(docCount)}</strong> document(s) analyzed &middot; ` +
-    `<strong>${escapeHtml(discCount)}</strong> discrepanc${discCount === 1 ? 'y' : 'ies'} found`;
+    `분석 문서 <strong>${escapeHtml(docCount)}</strong>건 &middot; ` +
+    `적발된 불일치 <strong>${escapeHtml(discCount)}</strong>건`;
 
   timelineTableBody.innerHTML = '';
   const timeline = (result.timeline || []).slice().sort((a, b) => {
@@ -324,7 +332,7 @@ function renderResults(result) {
     card.innerHTML = `
       <div class="discrepancy-header">
         <span class="discrepancy-index">#${i + 1}</span>
-        <span class="discrepancy-type badge badge-${escapeHtml(d.type || 'other')}">${escapeHtml(d.type || 'other')}</span>
+        <span class="discrepancy-type badge badge-${escapeHtml(d.type || 'other')}">${escapeHtml(DISCREPANCY_TYPE_LABELS[d.type] || DISCREPANCY_TYPE_LABELS.other)}</span>
       </div>
       <p class="discrepancy-description">${escapeHtml(d.description)}</p>
       <div class="discrepancy-sources">
@@ -352,18 +360,18 @@ analyzeBtn.addEventListener('click', async () => {
 
   const apiKey = apiKeyInput.value.trim();
   if (!apiKey) {
-    showError('Enter your Anthropic API key above before analyzing.');
+    showError('분석 전에 위에 Anthropic API 키를 입력하세요.');
     return;
   }
 
   const docs = collectDocuments();
   if (docs.length < 2) {
-    showError('Add at least two documents with text before analyzing.');
+    showError('분석 전에 텍스트가 포함된 문서를 2건 이상 추가하세요.');
     return;
   }
   const unnamed = docs.find((d) => !d.name);
   if (unnamed) {
-    showError('Every document needs a name so citations are unambiguous.');
+    showError('인용 출처를 명확히 하기 위해 모든 문서에 이름이 필요합니다.');
     return;
   }
 
