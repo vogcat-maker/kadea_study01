@@ -279,6 +279,78 @@ th {
 .badge-semantic { color: var(--badge-semantic); background: var(--badge-semantic-bg); }
 .badge-other { color: var(--badge-other); background: var(--badge-other-bg); }
 
+.badge-direction {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  text-transform: none;
+}
+
+.badge-trend-yes {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  text-transform: none;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.badge-trend-no {
+  color: var(--muted);
+  background: var(--badge-other-bg);
+  text-transform: none;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.pattern-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--bg);
+}
+
+.pattern-verdict {
+  margin-bottom: 0.5rem;
+}
+
+.pattern-description {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 0.92rem;
+}
+
+.pattern-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pattern-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+}
+
+.pattern-direction {
+  font-weight: 600;
+  min-width: 9rem;
+}
+
+.pattern-count {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.pattern-refs {
+  color: var(--muted);
+}
+
 .discrepancy-description {
   margin: 0.25rem 0 0.75rem;
 }

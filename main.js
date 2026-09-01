@@ -11,14 +11,22 @@ const SYSTEM_PROMPT = `당신은 다중 문서 간의 사실관계 교차 검증
 제공된 여러 건의 진술서, 준비서면, 증거 자료 등을 정밀 대조하여 서술의 불일치, 수치 왜곡, 시계열 모순, 진술 번복(의미 축소/변형)을 기계적이고 객관적으로 적발합니다.
 
 [절대 준수 원칙]
-1. 법적 판단 금지: "이는 사기죄에 해당함", "명백한 위증임"과 같은 법적 단정을 절대 내리지 마십시오. 철저히 사실관계의 불일치(예: "문서 A에서는 X라고 명시했으나, 문서 B에서는 Y라고 번복함")만을 서술하십시오.
+1. 법적 판단 금지: "이는 사기죄에 해당함", "명백한 위증임", "고의적 조작임"과 같은 법적/의도적 단정을 절대 내리지 마십시오. 철저히 사실관계의 불일치(예: "문서 A에서는 X라고 명시했으나, 문서 B에서는 Y라고 번복함")만을 서술하십시오.
 2. 엄격한 근거 기반(Grounding): 모든 모순 지적은 반드시 해당 문서명, 원문 인용(verbatim quote), 페이지/단락 정보를 포함해야 합니다. 문서에 없는 내용을 추측하거나 지어내지 마십시오.
 3. 시계열 재구성: 문서에 등장하는 모든 사건 발생일, 작성일, 진술일을 절대적 시간 순서로 정렬하여 모순을 파악하십시오.
-4. 출력 형식: 대화형 설명이나 인사말 없이 지정된 JSON 포맷으로만 응답하십시오.
+4. 방향성 집계(패턴 탐지): "단순 실수"로 보일 수 있는 사소한 수치/일시/책임범위 변경이라도, 그 변경이 향하는 방향(증가/감소, 책임 확대/축소, 시점 이동)을 개별적으로 태깅하고, 여러 건의 변경이 우연이라 보기 어려울 만큼 일관된 방향으로 반복되는지 집계하여 객관적으로 제시하십시오. 이때도 고의성·의도·범죄 성립 여부는 절대 판단하지 말고, 관찰된 통계적 경향(예: "n건 중 m건이 동일 방향")만 기술하십시오. 그 경향이 무엇을 의미하는지의 최종 판단은 전적으로 사용자(및 법적 절차)의 몫입니다.
+5. 출력 형식: 대화형 설명이나 인사말 없이 지정된 JSON 포맷으로만 응답하십시오.
 
 반드시 "report_discrepancy_analysis" 도구를 정확히 한 번 호출하여 분석 결과 전체를 전달하십시오. 도구 호출 외의 어떠한 설명 텍스트도 포함하지 마십시오.`;
 
 const DISCREPANCY_TYPES = ['수치_불일치', '시계열_모순', '사실관계_충돌', '진술_번복_뉘앙스변화'];
+
+const DIRECTION_TAGS = [
+  '수치_증가', '수치_감소',
+  '책임범위_축소', '책임범위_확대',
+  '시점_앞당김', '시점_지연',
+  '해당없음'
+];
 
 const RESULT_SCHEMA = {
   type: 'object',
@@ -46,10 +54,16 @@ const RESULT_SCHEMA = {
       items: {
         type: 'object',
         properties: {
+          id: { type: 'string', description: '이 항목을 패턴_분석에서 참조하기 위한 고유 식별자 (예: "D1", "D2").' },
           모순_유형: {
             type: 'string',
             enum: DISCREPANCY_TYPES,
             description: '수치_불일치 | 시계열_모순 | 사실관계_충돌 | 진술_번복_뉘앙스변화'
+          },
+          변화_방향: {
+            type: 'string',
+            enum: DIRECTION_TAGS,
+            description: '문서A(선행/원본)에서 문서B(후행/수정)로 넘어가며 값이 향한 객관적 방향. 의도 판단 없이 관찰된 방향만 태깅.'
           },
           항목_제목: { type: 'string', description: '모순점 요약 제목.' },
           상세_대조: {
@@ -79,11 +93,39 @@ const RESULT_SCHEMA = {
           불일치_요약: { type: 'string', description: '두 진술/수치가 어떻게 충돌하는지에 대한 객관적 설명. 법적 판단 배제.' },
           중요도_점수: { type: 'integer', minimum: 1, maximum: 5, description: '1(경미)부터 5(중대)까지의 정수.' }
         },
-        required: ['모순_유형', '항목_제목', '상세_대조', '불일치_요약', '중요도_점수']
+        required: ['id', '모순_유형', '변화_방향', '항목_제목', '상세_대조', '불일치_요약', '중요도_점수']
       }
+    },
+    패턴_분석: {
+      type: 'object',
+      description: '개별 모순들의 방향성(변화_방향)을 집계한 결과. 의도나 고의성은 판단하지 않고 관찰된 통계적 경향만 기술.',
+      properties: {
+        방향성_집계: {
+          type: 'array',
+          description: '해당없음을 제외한 각 방향 태그별 건수 집계.',
+          items: {
+            type: 'object',
+            properties: {
+              방향: { type: 'string', enum: DIRECTION_TAGS },
+              건수: { type: 'integer' },
+              관련_항목_id: { type: 'array', items: { type: 'string' } }
+            },
+            required: ['방향', '건수', '관련_항목_id']
+          }
+        },
+        일관된_경향_존재: {
+          type: 'boolean',
+          description: '해당없음을 제외한 모순 중 다수(과반)가 동일 방향으로 수렴하는지 여부.'
+        },
+        경향_설명: {
+          type: 'string',
+          description: '관찰된 경향에 대한 객관적·통계적 서술만 포함 (예: "탐지된 5건의 방향성 있는 불일치 중 4건이 책임범위_축소 방향으로 일관됨"). 의도·고의·범죄 성립 여부에 대한 판단은 절대 포함하지 말 것.'
+        }
+      },
+      required: ['방향성_집계', '일관된_경향_존재', '경향_설명']
     }
   },
-  required: ['시계열_분석', '탐지된_모순_목록']
+  required: ['시계열_분석', '탐지된_모순_목록', '패턴_분석']
 };
 
 const DISCREPANCY_TYPE_LABELS = {
@@ -98,6 +140,16 @@ const DISCREPANCY_TYPE_STYLE = {
   '시계열_모순': 'date_time',
   '사실관계_충돌': 'factual',
   '진술_번복_뉘앙스변화': 'semantic'
+};
+
+const DIRECTION_LABELS = {
+  '수치_증가': '수치 ↑ 증가',
+  '수치_감소': '수치 ↓ 감소',
+  '책임범위_축소': '책임범위 ↓ 축소',
+  '책임범위_확대': '책임범위 ↑ 확대',
+  '시점_앞당김': '시점 ← 앞당김',
+  '시점_지연': '시점 → 지연',
+  '해당없음': null
 };
 
 const documentsListEl = document.getElementById('documents-list');
@@ -115,6 +167,7 @@ const errorBoxEl = document.getElementById('error-box');
 
 const resultsPanel = document.getElementById('results-panel');
 const resultsSummaryEl = document.getElementById('results-summary');
+const patternPanelEl = document.getElementById('pattern-panel');
 const timelineTableBody = document.querySelector('#timeline-table tbody');
 const timelineEmptyEl = document.getElementById('timeline-empty');
 const discrepanciesListEl = document.getElementById('discrepancies-list');
@@ -256,8 +309,9 @@ ${docBlocks.join('\n')}
    - 직접적 사실 충돌 (A문서와 B문서의 주장이 정면 배치되는 경우)
    - 수치/일시 변형 (단순 오타인지 의도적 변경인지 맥락 포함)
    - 표현 및 뉘앙스 변화 (예: "본 적 없다" -> "기억나지 않는다" -> "그 자리에 없었다" 등 진술 연성화)
+4. 방향성 집계: 탐지된 각 모순에 변화_방향을 태깅하고("해당없음" 제외), 여러 건이 동일한 방향(수치 증감, 책임범위 확대/축소, 시점 이동)으로 반복되는지 패턴_분석에 집계하십시오. 개별 사소한 변경이 "단순 실수"로 설명될 수 있더라도, 그 방향성이 일관되게 반복되는 경우는 그 자체로 객관적 관찰 사실이므로 반드시 수치로 제시하십시오. 의도·고의성·범죄 성립 여부는 절대 판단하지 마십시오.
 
-지정된 "report_discrepancy_analysis" 도구를 통해 시계열_분석과 탐지된_모순_목록을 정확히 준수하여 출력하십시오.`;
+지정된 "report_discrepancy_analysis" 도구를 통해 시계열_분석, 탐지된_모순_목록, 패턴_분석을 정확히 준수하여 출력하십시오.`;
 }
 
 async function callClaude(apiKey, docs) {
@@ -271,7 +325,7 @@ async function callClaude(apiKey, docs) {
     tools: [
       {
         name: 'report_discrepancy_analysis',
-        description: '문서 교차 분석 결과(시계열_분석, 탐지된_모순_목록)를 구조화된 형태로 보고합니다.',
+        description: '문서 교차 분석 결과(시계열_분석, 탐지된_모순_목록, 패턴_분석)를 구조화된 형태로 보고합니다.',
         input_schema: RESULT_SCHEMA
       }
     ],
@@ -348,12 +402,14 @@ function renderResults(result, docCount) {
   discrepancies.forEach((d, i) => {
     const docA = d.상세_대조?.문서A;
     const docB = d.상세_대조?.문서B;
+    const directionLabel = DIRECTION_LABELS[d.변화_방향];
     const card = document.createElement('div');
     card.className = 'discrepancy-card';
     card.innerHTML = `
       <div class="discrepancy-header">
-        <span class="discrepancy-index">#${i + 1}</span>
+        <span class="discrepancy-index">#${escapeHtml(d.id || i + 1)}</span>
         <span class="discrepancy-type badge badge-${escapeHtml(DISCREPANCY_TYPE_STYLE[d.모순_유형] || 'other')}">${escapeHtml(DISCREPANCY_TYPE_LABELS[d.모순_유형] || d.모순_유형 || '기타')}</span>
+        ${directionLabel ? `<span class="badge badge-direction">${escapeHtml(directionLabel)}</span>` : ''}
         <span class="importance-score" title="중요도 ${escapeHtml(d.중요도_점수)}/5">${importanceDots(d.중요도_점수)}</span>
       </div>
       <h4 class="discrepancy-title">${escapeHtml(d.항목_제목)}</h4>
@@ -374,8 +430,41 @@ function renderResults(result, docCount) {
     discrepanciesListEl.appendChild(card);
   });
 
+  renderPatternAnalysis(result.패턴_분석);
+
   resultsPanel.hidden = false;
   resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPatternAnalysis(pattern) {
+  patternPanelEl.innerHTML = '';
+  if (!pattern) {
+    patternPanelEl.innerHTML = '<p class="empty-note">경향성 데이터가 없습니다.</p>';
+    return;
+  }
+
+  const aggregation = pattern.방향성_집계 || [];
+  const verdictBadge = `
+    <span class="badge ${pattern.일관된_경향_존재 ? 'badge-trend-yes' : 'badge-trend-no'}">
+      ${pattern.일관된_경향_존재 ? '일관된 방향성 관찰됨' : '일관된 방향성 없음'}
+    </span>
+  `;
+
+  const rows = aggregation.length
+    ? aggregation.map((a) => `
+        <div class="pattern-row">
+          <span class="pattern-direction">${escapeHtml(DIRECTION_LABELS[a.방향] || a.방향)}</span>
+          <span class="pattern-count">${escapeHtml(a.건수)}건</span>
+          <span class="pattern-refs">${(a.관련_항목_id || []).map((id) => `#${escapeHtml(id)}`).join(', ')}</span>
+        </div>
+      `).join('')
+    : '<p class="empty-note">방향성이 태깅된 항목이 없습니다.</p>';
+
+  patternPanelEl.innerHTML = `
+    <div class="pattern-verdict">${verdictBadge}</div>
+    <p class="pattern-description">${escapeHtml(pattern.경향_설명)}</p>
+    <div class="pattern-rows">${rows}</div>
+  `;
 }
 
 analyzeBtn.addEventListener('click', async () => {
