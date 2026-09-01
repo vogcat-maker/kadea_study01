@@ -18,91 +18,86 @@ const SYSTEM_PROMPT = `당신은 다중 문서 간의 사실관계 교차 검증
 
 반드시 "report_discrepancy_analysis" 도구를 정확히 한 번 호출하여 분석 결과 전체를 전달하십시오. 도구 호출 외의 어떠한 설명 텍스트도 포함하지 마십시오.`;
 
+const DISCREPANCY_TYPES = ['수치_불일치', '시계열_모순', '사실관계_충돌', '진술_번복_뉘앙스변화'];
+
 const RESULT_SCHEMA = {
   type: 'object',
   properties: {
-    documents: {
+    시계열_분석: {
       type: 'array',
-      description: '분석 대상이 된 모든 문서.',
+      description: '모든 문서에 언급된 일시/날짜와 해당 사건을 시간 순서대로 재배열한 목록.',
       items: {
         type: 'object',
         properties: {
-          name: { type: 'string', description: '제공된 그대로의 정확한 문서명.' },
-          summary: { type: 'string', description: '해석을 배제한, 문서 성격에 대한 한 문장의 중립적 설명.' }
-        },
-        required: ['name']
-      }
-    },
-    timeline: {
-      type: 'array',
-      description: '모든 문서에 등장하는 일자/시각과 관련 사건을 절대적 시간 순서로 정렬한 항목.',
-      items: {
-        type: 'object',
-        properties: {
-          date: { type: 'string', description: '가능한 경우 ISO 8601 형식, 그렇지 않으면 문서에 기재된 그대로의 일자/시각.' },
-          event: { type: 'string', description: '사건에 대한 객관적 서술.' },
-          source_document: { type: 'string', description: '해당 사건의 출처가 된 정확한 문서명.' },
-          location: { type: 'string', description: '출처 문서 내 조항/페이지/단락 정보.' },
-          quote: { type: 'string', description: '이 시계열 항목을 뒷받침하는 원문 그대로의 인용.' }
-        },
-        required: ['date', 'event', 'source_document', 'quote']
-      }
-    },
-    discrepancies: {
-      type: 'array',
-      description: '문서 간 적발된 모든 불일치 사항.',
-      items: {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['numerical', 'date_time', 'factual', 'semantic', 'other'],
-            description: '불일치 유형: numerical(수치 왜곡), date_time(시계열 모순), factual(서술의 불일치), semantic(진술 번복/의미 축소·변형), other(기타).'
-          },
-          description: {
-            type: 'string',
-            description: '법적 판단을 배제한 객관적 불일치 서술. 예: "문서 A에서는 X라고 명시했으나, 문서 B에서는 Y라고 번복함."'
-          },
-          document_a: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              location: { type: 'string', description: '조항/페이지 번호.' },
-              quote: { type: 'string', description: '원문 그대로의 인용.' }
-            },
-            required: ['name', 'location', 'quote']
-          },
-          document_b: {
-            type: 'object',
-            properties: {
-              name: { type: 'string' },
-              location: { type: 'string', description: '조항/페이지 번호.' },
-              quote: { type: 'string', description: '원문 그대로의 인용.' }
-            },
-            required: ['name', 'location', 'quote']
+          일시: { type: 'string', description: 'YYYY-MM-DD 또는 문서에 명시된 시점 그대로.' },
+          사건_내용: { type: 'string', description: '문서에 언급된 구체적 행위나 사건.' },
+          출처: {
+            type: 'array',
+            items: { type: 'string' },
+            description: '문서명 및 인용 위치 (예: "진술서(2024.3.2), 2문단").'
           }
         },
-        required: ['type', 'description', 'document_a', 'document_b']
+        required: ['일시', '사건_내용', '출처']
       }
     },
-    summary: {
-      type: 'object',
-      properties: {
-        documents_analyzed: { type: 'integer' },
-        discrepancies_found: { type: 'integer' }
-      },
-      required: ['documents_analyzed', 'discrepancies_found']
+    탐지된_모순_목록: {
+      type: 'array',
+      description: '탐지된 모든 모순/불일치 사항.',
+      items: {
+        type: 'object',
+        properties: {
+          모순_유형: {
+            type: 'string',
+            enum: DISCREPANCY_TYPES,
+            description: '수치_불일치 | 시계열_모순 | 사실관계_충돌 | 진술_번복_뉘앙스변화'
+          },
+          항목_제목: { type: 'string', description: '모순점 요약 제목.' },
+          상세_대조: {
+            type: 'object',
+            properties: {
+              문서A: {
+                type: 'object',
+                properties: {
+                  문서명: { type: 'string' },
+                  원문_인용: { type: 'string', description: '정확한 원문 문장.' },
+                  주장_내용: { type: 'string', description: '해당 문서에서 주장하는 요점.' }
+                },
+                required: ['문서명', '원문_인용', '주장_내용']
+              },
+              문서B: {
+                type: 'object',
+                properties: {
+                  문서명: { type: 'string' },
+                  원문_인용: { type: 'string', description: '정확한 원문 문장.' },
+                  주장_내용: { type: 'string', description: '해당 문서에서 주장하는 요점.' }
+                },
+                required: ['문서명', '원문_인용', '주장_내용']
+              }
+            },
+            required: ['문서A', '문서B']
+          },
+          불일치_요약: { type: 'string', description: '두 진술/수치가 어떻게 충돌하는지에 대한 객관적 설명. 법적 판단 배제.' },
+          중요도_점수: { type: 'integer', minimum: 1, maximum: 5, description: '1(경미)부터 5(중대)까지의 정수.' }
+        },
+        required: ['모순_유형', '항목_제목', '상세_대조', '불일치_요약', '중요도_점수']
+      }
     }
   },
-  required: ['documents', 'timeline', 'discrepancies', 'summary']
+  required: ['시계열_분석', '탐지된_모순_목록']
 };
 
 const DISCREPANCY_TYPE_LABELS = {
-  numerical: '수치 왜곡',
-  date_time: '시계열 모순',
-  factual: '서술의 불일치',
-  semantic: '진술 번복',
-  other: '기타'
+  '수치_불일치': '수치 불일치',
+  '시계열_모순': '시계열 모순',
+  '사실관계_충돌': '사실관계 충돌',
+  '진술_번복_뉘앙스변화': '진술 번복·뉘앙스 변화'
+};
+
+const DISCREPANCY_TYPE_STYLE = {
+  '수치_불일치': 'numerical',
+  '시계열_모순': 'date_time',
+  '사실관계_충돌': 'factual',
+  '진술_번복_뉘앙스변화': 'semantic'
 };
 
 const documentsListEl = document.getElementById('documents-list');
@@ -132,15 +127,17 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function addDocumentRow(name = '', text = '') {
+function addDocumentRow(name = '', text = '', date = '') {
   const fragment = documentItemTemplate.content.cloneNode(true);
   const item = fragment.querySelector('.document-item');
   const nameInput = item.querySelector('.doc-name');
+  const dateInput = item.querySelector('.doc-date');
   const textArea = item.querySelector('.doc-text');
   const fileInput = item.querySelector('.doc-file');
   const removeBtn = item.querySelector('.remove-document-btn');
 
   nameInput.value = name;
+  dateInput.value = date;
   textArea.value = text;
 
   fileInput.addEventListener('change', () => {
@@ -178,9 +175,10 @@ function collectDocuments() {
   const docs = [];
   for (const item of items) {
     const name = item.querySelector('.doc-name').value.trim();
+    const date = item.querySelector('.doc-date').value.trim();
     const text = item.querySelector('.doc-text').value.trim();
     if (!name && !text) continue;
-    docs.push({ name, text });
+    docs.push({ name, date, text });
   }
   return docs;
 }
@@ -239,10 +237,27 @@ function setAnalyzing(isAnalyzing) {
 }
 
 function buildUserMessage(docs) {
-  const parts = docs.map((doc, i) => {
-    return `--- 문서 ${i + 1}: ${doc.name || `(문서 ${i + 1}, 이름 없음)`} ---\n${doc.text}`;
+  const docBlocks = docs.map((doc, i) => {
+    const name = doc.name || `(문서 ${i + 1}, 이름 없음)`;
+    const date = doc.date || '미상';
+    return `---\n문서 ${i + 1} (문서명: ${name}, 작성일자: ${date}):\n${doc.text}`;
   });
-  return `다음 ${docs.length}개 문서를 대조하여 지침에 따라 모든 불일치 사항을 적발하십시오.\n\n${parts.join('\n\n')}`;
+
+  return `제공된 문서들을 상호 대조하여 진술의 모순, 수치 왜곡, 시간 순서의 불일치, 미세한 표현 변화(책임 회피성 의미 축소 등)를 찾아내 분석하십시오.
+
+[분석 대상 문서 목록]
+${docBlocks.join('\n')}
+---
+
+[분석 단계]
+1. 시계열 통합: 모든 문서에 언급된 일시/날짜와 해당 사건을 시간 순서대로 재배열하십시오.
+2. 핵심 팩트 및 수치 앵커링: 금액, 수량, 횟수, 위치, 핵심 행위 등 변동되면 안 되는 데이터를 추적하십시오.
+3. 불일치/모순 탐지:
+   - 직접적 사실 충돌 (A문서와 B문서의 주장이 정면 배치되는 경우)
+   - 수치/일시 변형 (단순 오타인지 의도적 변경인지 맥락 포함)
+   - 표현 및 뉘앙스 변화 (예: "본 적 없다" -> "기억나지 않는다" -> "그 자리에 없었다" 등 진술 연성화)
+
+지정된 "report_discrepancy_analysis" 도구를 통해 시계열_분석과 탐지된_모순_목록을 정확히 준수하여 출력하십시오.`;
 }
 
 async function callClaude(apiKey, docs) {
@@ -256,7 +271,7 @@ async function callClaude(apiKey, docs) {
     tools: [
       {
         name: 'report_discrepancy_analysis',
-        description: 'Report the structured results of the document cross-examination and discrepancy analysis.',
+        description: '문서 교차 분석 결과(시계열_분석, 탐지된_모순_목록)를 구조화된 형태로 보고합니다.',
         input_schema: RESULT_SCHEMA
       }
     ],
@@ -293,19 +308,23 @@ async function callClaude(apiKey, docs) {
   return toolUse.input;
 }
 
-function renderResults(result) {
+function importanceDots(score) {
+  const n = Math.max(1, Math.min(5, Number(score) || 0));
+  return '●'.repeat(n) + '○'.repeat(5 - n);
+}
+
+function renderResults(result, docCount) {
   rawJsonEl.textContent = JSON.stringify(result, null, 2);
 
-  const docCount = result.summary?.documents_analyzed ?? (result.documents || []).length;
-  const discCount = result.summary?.discrepancies_found ?? (result.discrepancies || []).length;
+  const discCount = (result.탐지된_모순_목록 || []).length;
   resultsSummaryEl.innerHTML =
     `분석 문서 <strong>${escapeHtml(docCount)}</strong>건 &middot; ` +
     `적발된 불일치 <strong>${escapeHtml(discCount)}</strong>건`;
 
   timelineTableBody.innerHTML = '';
-  const timeline = (result.timeline || []).slice().sort((a, b) => {
-    const da = Date.parse(a.date);
-    const db = Date.parse(b.date);
+  const timeline = (result.시계열_분석 || []).slice().sort((a, b) => {
+    const da = Date.parse(a.일시);
+    const db = Date.parse(b.일시);
     if (isNaN(da) && isNaN(db)) return 0;
     if (isNaN(da)) return 1;
     if (isNaN(db)) return -1;
@@ -313,38 +332,42 @@ function renderResults(result) {
   });
   timelineEmptyEl.hidden = timeline.length > 0;
   for (const entry of timeline) {
+    const sources = Array.isArray(entry.출처) ? entry.출처 : [entry.출처].filter(Boolean);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${escapeHtml(entry.date)}</td>
-      <td>${escapeHtml(entry.event)}</td>
-      <td>${escapeHtml(entry.source_document)}</td>
-      <td>${escapeHtml(entry.location ? `${entry.location} — ` : '')}<em>"${escapeHtml(entry.quote)}"</em></td>
+      <td>${escapeHtml(entry.일시)}</td>
+      <td>${escapeHtml(entry.사건_내용)}</td>
+      <td>${sources.map((s) => `<div>${escapeHtml(s)}</div>`).join('')}</td>
     `;
     timelineTableBody.appendChild(tr);
   }
 
   discrepanciesListEl.innerHTML = '';
-  const discrepancies = result.discrepancies || [];
+  const discrepancies = result.탐지된_모순_목록 || [];
   discrepanciesEmptyEl.hidden = discrepancies.length > 0;
   discrepancies.forEach((d, i) => {
+    const docA = d.상세_대조?.문서A;
+    const docB = d.상세_대조?.문서B;
     const card = document.createElement('div');
     card.className = 'discrepancy-card';
     card.innerHTML = `
       <div class="discrepancy-header">
         <span class="discrepancy-index">#${i + 1}</span>
-        <span class="discrepancy-type badge badge-${escapeHtml(d.type || 'other')}">${escapeHtml(DISCREPANCY_TYPE_LABELS[d.type] || DISCREPANCY_TYPE_LABELS.other)}</span>
+        <span class="discrepancy-type badge badge-${escapeHtml(DISCREPANCY_TYPE_STYLE[d.모순_유형] || 'other')}">${escapeHtml(DISCREPANCY_TYPE_LABELS[d.모순_유형] || d.모순_유형 || '기타')}</span>
+        <span class="importance-score" title="중요도 ${escapeHtml(d.중요도_점수)}/5">${importanceDots(d.중요도_점수)}</span>
       </div>
-      <p class="discrepancy-description">${escapeHtml(d.description)}</p>
+      <h4 class="discrepancy-title">${escapeHtml(d.항목_제목)}</h4>
+      <p class="discrepancy-description">${escapeHtml(d.불일치_요약)}</p>
       <div class="discrepancy-sources">
         <div class="source-block">
-          <div class="source-name">${escapeHtml(d.document_a?.name)}</div>
-          <div class="source-location">${escapeHtml(d.document_a?.location)}</div>
-          <blockquote>${escapeHtml(d.document_a?.quote)}</blockquote>
+          <div class="source-name">${escapeHtml(docA?.문서명)}</div>
+          <blockquote>${escapeHtml(docA?.원문_인용)}</blockquote>
+          <div class="source-claim">${escapeHtml(docA?.주장_내용)}</div>
         </div>
         <div class="source-block">
-          <div class="source-name">${escapeHtml(d.document_b?.name)}</div>
-          <div class="source-location">${escapeHtml(d.document_b?.location)}</div>
-          <blockquote>${escapeHtml(d.document_b?.quote)}</blockquote>
+          <div class="source-name">${escapeHtml(docB?.문서명)}</div>
+          <blockquote>${escapeHtml(docB?.원문_인용)}</blockquote>
+          <div class="source-claim">${escapeHtml(docB?.주장_내용)}</div>
         </div>
       </div>
     `;
@@ -378,7 +401,7 @@ analyzeBtn.addEventListener('click', async () => {
   setAnalyzing(true);
   try {
     const result = await callClaude(apiKey, docs);
-    renderResults(result);
+    renderResults(result, docs.length);
   } catch (err) {
     showError(err.message || String(err));
   } finally {

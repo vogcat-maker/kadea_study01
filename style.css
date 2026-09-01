@@ -246,6 +246,24 @@ th {
   font-weight: 600;
 }
 
+.importance-score {
+  margin-left: auto;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+.discrepancy-title {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 1rem;
+}
+
+.source-claim {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
 .badge {
   display: inline-block;
   padding: 0.15rem 0.55rem;
