@@ -6,7 +6,7 @@
 | # | 주제 | 영상 (1280×720 MP4) | 길이 | PDF (A4) |
 |---|------|------|------|-----|
 | 1 | 장착 | `video/KADEA_AVM_01_install.mp4` | 약 2분 51초 | `pdf/KADEA_AVM_01_install.pdf` |
-| 2 | 캘리브레이션 | `video/KADEA_AVM_02_calibration.mp4` | 약 2분 47초 | `pdf/KADEA_AVM_02_calibration.pdf` |
+| 2 | 캘리브레이션 | `video/KADEA_AVM_02_calibration.mp4` | 약 2분 24초 | `pdf/KADEA_AVM_02_calibration.pdf` |
 | 3 | 펌웨어 업데이트 | `video/KADEA_AVM_03_firmware.mp4` | 약 1분 18초 | `pdf/KADEA_AVM_03_firmware.pdf` |
 | 4 | 작동 설명 | `video/KADEA_AVM_04_operation.mp4` | 약 2분 11초 | `pdf/KADEA_AVM_04_operation.pdf` |
 

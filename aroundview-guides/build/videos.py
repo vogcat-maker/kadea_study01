@@ -169,28 +169,16 @@ CALIB = dict(
                  "Front → Rear → Left → Right 자동 진행",
                  "E. <b>Cam view</b> 복귀 후 <b>Detect</b> 실행",
              ], "big steps")}</div></div>"""),
-        dict(title="자동 보정 ④ 저장 · 재부팅", cap="성공하면 APPLY를 눌러 저장하고, 실패하면 다시 Detect를 실행합니다. 성공 후에는 반드시 재부팅합니다. 계속 실패하면 수동 보정으로 넘어갑니다.",
+        dict(title="자동 보정 ④ 저장 · 재부팅", cap="성공하면 APPLY를 눌러 저장하고, 실패하면 보정판 위치와 조명을 확인한 뒤 다시 Detect를 실행합니다. 성공 후에는 반드시 재부팅합니다.",
              body=f"""<div class="flow">
 <div class="fbox ok">성공 → <b>APPLY</b><br>저장</div><div class="farrow">→</div>
 <div class="fbox">재부팅</div><div class="farrow">→</div><div class="fbox">탑뷰 확인</div></div>
-<div class="flow"><div class="fbox ng">실패 → 다시 <b>Detect</b></div><div class="farrow">→</div><div class="fbox ng">반복 실패 → <b>수동 보정</b></div></div>"""),
-        dict(title="수동 보정 ① 진입", cap="자동 보정이 실패한 카메라 화면을 터치하면 크게 확대되며 수동 보정 화면으로 들어갑니다. 영상 영역을 터치하면 오른쪽에 그 부분이 확대되어 표시됩니다.",
-             body=f"""<div class="split"><div>{img("cal_manual", cls="shadow fill")}</div><div>{ul([
-                 "A. 보정할 카메라 화면 <b>터치</b>",
-                 "B. 확대 → 수동 보정 화면 진입",
-                 "C. 영상 영역 터치 → 우측에 <b>확대 화면</b>",
-                 "D. 점 주변 터치 → 상단 ◁1▷ … ◁8▷ 버튼 활성",
-             ], "big steps")}</div></div>"""),
-        dict(title="수동 보정 ② 포인트 1~8 맞추기", cap="숫자 버튼 1번부터 8번까지 차례로 선택하며, 각 점을 사각 패턴의 모서리에 정확히 맞춥니다. 모두 끝나면 상단의 Fit 버튼을 누르고 완료 문구를 확인합니다.",
-             body=f"""<div class="stack big">{img("cal_points", "포인트 1~8 → 각 사각 패턴(■)의 모서리")}</div>{ul([
-                 "◁숫자▷ <b>1 → 8</b> 순서대로 선택 · 화살표로 미세 조정",
-                 "완료 후 상단 <b>Fit</b> → 완료 문구 확인 → <b>Apply</b> 저장 → 재부팅",
-             ], "inline")}"""),
-        dict(title="최종 확인", cap="USB를 제거하고 탑뷰에서 차량 주변 선과 패턴이 카메라 경계에서 자연스럽게 이어지는지 확인합니다. 어긋나면 해당 카메라만 수동 보정을 반복합니다.",
+<div class="flow"><div class="fbox ng">실패 → 다시 <b>Detect</b></div><div class="farrow">→</div><div class="fbox ng">반복 실패 → 보정판 거리·조명 재확인</div></div>"""),
+        dict(title="최종 확인", cap="USB를 제거하고 탑뷰에서 차량 주변 선과 패턴이 카메라 경계에서 자연스럽게 이어지는지 확인합니다. 어긋나면 보정판 위치를 다시 확인하고 자동 보정을 반복합니다.",
              body=f"""<div class="split"><div>{img("ui_3d_car", cls="shadow fill")}</div><div>{ul([
                  "USB 메모리 제거",
                  "탑뷰 경계에서 패턴·선이 <b>이어지는지</b>",
-                 "어긋난 카메라만 수동 보정 반복",
+                 "어긋나면 보정판 위치 확인 후 자동 보정 반복",
                  "카메라 위치를 옮겼다면 <b>재보정</b> 필요",
              ], "big")}</div></div>"""),
         ending("캘리브레이션이 완료되었습니다.", "다음: PART 3 펌웨어 업데이트"),
