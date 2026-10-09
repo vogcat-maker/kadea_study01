@@ -262,7 +262,7 @@ OPERATION = dict(
         dict(title="3D 와이드 · 회전 뷰", cap="확대 버튼을 누르면 더 넓은 와이드 뷰로 바뀝니다. 회전 아이콘을 누르면 차량 주위를 시계 방향으로 돌아가며 12시, 10시, 9시 방향 등에서 볼 수 있습니다.",
              body=f"""<div class="split"><div>{marked("ui_wide", [dict(x=.55, y=.09, d="sw", len=70, label="확대 버튼")], width=580, cap="3D 와이드 뷰 (확대 버튼)")}</div><div>{marked("ui_rot", [dict(x=.685, y=.5, d="w", len=60, label="회전")], width=580, cap="3D 회전 뷰 (회전 아이콘)")}</div></div>"""),
         dict(title="2D 뷰", cap="2D 모드에서는 전방 와이드, 전방과 탑뷰, 후방 와이드, 후방과 탑뷰, 듀얼 사이드, 좌우 전후방 뷰 등 열 가지 화면을 사용할 수 있습니다.",
-             body=f"""<div class="split"><div>{marked("ui_2d_rear", [dict(x=.32, y=.85, w=.30, h=.26, kind="box", d="ne", len=60, label="주차 가이드선")], width=580, cap="2D 후방 + 탑뷰 (주차 가이드선)")}</div><div>{ul([
+             body=f"""<div class="split"><div>{marked("ui_2d_rear", [dict(x=.14, y=.57, w=.17, h=.36, kind="box", d="n", len=40, label="좌측 가이드선"), dict(x=.48, y=.57, w=.17, h=.36, kind="box", d="n", len=40, label="우측 가이드선")], width=580, pad=20, cap="2D 후방 + 탑뷰 (좌·우 주차 가이드선)")}</div><div>{ul([
                  "전방 와이드 / 전방 + 탑뷰", "후방 와이드 / 후방 + 탑뷰",
                  "전방·후방 듀얼 사이드", "좌측 전방 · 좌측 후방", "우측 전방 · 우측 후방",
              ], "big")}</div></div>"""),
