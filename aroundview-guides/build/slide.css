@@ -93,3 +93,7 @@ td { font-size: 18px; padding: 8px 10px; border-bottom: 1px solid #e9ecef; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
 .grid2 img { max-height: 215px; border-radius: 8px; }
 .grid2 figcaption { margin-top: 3px; }
+.mk { position: relative; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.mk img { display: block; border-radius: 8px; max-height: none !important; max-width: none !important; }
+.mk-ov { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.mk-fig figcaption { margin-top: 8px; }

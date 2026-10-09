@@ -123,3 +123,74 @@ POWER_ROWS = [
     [chip("#2f9e44", "초록") + chip("#111111", "검정"), "UART", "3 / 4 / 6", "진단·서비스용", "미사용"],
 ]
 POWER_HEAD = ["전선 색", "라벨", "핀", "연결 위치", "구분"]
+
+
+# --------------------------------------------------------------------------
+# 화면 위 화살표/번호 표시: marked("cal_menubar", [dict(x=.43, y=.8, label="A", d="s"), ...])
+#   x, y : 이미지 안의 위치 (0~1 비율)
+#   d    : 화살표가 들어오는 방향 (s, n, e, w, se, sw, ne, nw) / kind="badge" 는 번호 원만 표시
+# --------------------------------------------------------------------------
+_DIRS = {"s": (0, 1), "n": (0, -1), "e": (1, 0), "w": (-1, 0),
+         "se": (.75, .75), "sw": (-.75, .75), "ne": (.75, -.75), "nw": (-.75, -.75)}
+
+
+def marked(name, marks, width=560, cap=None, pad=0):
+    from PIL import Image
+    w0, h0 = Image.open(IMG / f"{name}.jpg").size
+    W, H = width, round(width * h0 / w0)
+    k = max(.7, min(1.0, W / 560))                    # 작은 이미지는 화살표도 작게
+    red, ring = "#e03131", 20 * k
+    parts = []
+    for m in marks:
+        x, y = m["x"] * W, m["y"] * H
+        if m.get("kind") == "badge":
+            bx, by = x + m.get("dx", 0), y + m.get("dy", -34)
+            parts.append(f'<circle cx="{bx}" cy="{by}" r="16" fill="{red}" stroke="#fff" stroke-width="3"/>'
+                         f'<text x="{bx}" y="{by + 7}" text-anchor="middle" font-size="19" font-weight="800" '
+                         f'fill="#fff">{m["label"]}</text>')
+            continue
+        if m.get("kind") == "box":                     # 영역 강조 사각형
+            bw, bh = m["w"] * W, m["h"] * H
+            parts.append(f'<rect x="{x - bw / 2}" y="{y - bh / 2}" width="{bw}" height="{bh}" rx="8" fill="none" '
+                         f'stroke="#fff" stroke-width="8"/><rect x="{x - bw / 2}" y="{y - bh / 2}" width="{bw}" '
+                         f'height="{bh}" rx="8" fill="none" stroke="{red}" stroke-width="4.5"/>')
+            r = max(bw, bh) / 2
+            if m.get("badge"):
+                bx, by = x - bw / 2, y - bh / 2
+                parts.append(f'<circle cx="{bx}" cy="{by}" r="14" fill="{red}" stroke="#fff" stroke-width="3"/>'
+                             f'<text x="{bx}" y="{by + 6}" text-anchor="middle" font-size="17" font-weight="800" '
+                             f'fill="#fff">{m["badge"]}</text>')
+        else:
+            r = ring
+            parts.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="none" stroke="#fff" stroke-width="8"/>'
+                         f'<circle cx="{x}" cy="{y}" r="{r}" fill="none" stroke="{red}" stroke-width="4.5"/>')
+        if m.get("d") is None:
+            continue
+        ux, uy = _DIRS[m["d"]]
+        L = m.get("len", 64) * k
+        if m.get("kind") == "box":
+            r = (abs(ux) * m["w"] * W + abs(uy) * m["h"] * H) / (abs(ux) + abs(uy)) / 2
+        sx, sy = x + ux * (r + 4), y + uy * (r + 4)
+        tx, ty = x + ux * (r + L), y + uy * (r + L)
+        parts.append(f'<line x1="{tx}" y1="{ty}" x2="{sx}" y2="{sy}" stroke="#fff" stroke-width="11" stroke-linecap="round"/>'
+                     f'<line x1="{tx}" y1="{ty}" x2="{sx}" y2="{sy}" stroke="{red}" stroke-width="6" '
+                     f'stroke-linecap="round" marker-end="url(#ah)"/>')
+        lab = m.get("label")
+        if lab:
+            fs = round(19 * k)
+            tw = sum(fs if ord(ch) > 0x2000 else fs * .62 for ch in lab) + 20
+            if uy == 0:
+                lx, ly = (tx + 6 if ux > 0 else tx - tw - 6), ty - 17
+            else:
+                lx = tx - tw / 2 + ux * (tw / 2 - 6)
+                ly = ty + 4 if uy > 0 else ty - 38
+            lx = min(max(lx, -40), W + 40 - tw)
+            parts.append(f'<rect x="{lx}" y="{ly}" width="{tw}" height="{fs + 15}" rx="8" fill="{red}" stroke="#fff" stroke-width="2"/>'
+                         f'<text x="{lx + tw / 2}" y="{ly + fs + 3}" text-anchor="middle" font-size="{fs}" '
+                         f'font-weight="800" fill="#fff">{lab}</text>')
+    svg = (f'<svg class="mk-ov" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="NanumSquare, NanumGothic">'
+           f'<defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto">'
+           f'<path d="M0,0 L10,5 L0,10 z" fill="{red}"/></marker></defs>{"".join(parts)}</svg>')
+    c = f'<figcaption>{cap}</figcaption>' if cap else ""
+    return (f'<figure class="mk-fig" style="margin:{pad}px 0"><div class="mk" style="width:{W}px;height:{H}px">'
+            f'<img src="{img_url(name)}" style="width:{W}px;height:{H}px">{svg}</div>{c}</figure>')
