@@ -61,7 +61,7 @@ INSTALL = dict(
         dict(title="★ 가장 중요: 카메라는 수직면에 부착", cap="가장 중요한 점입니다. 카메라는 차체의 수직면에 밀착하여 부착합니다. 약 42~45°의 하향 각도가 하우징에 이미 내장되어 있습니다. 부착면이 경사져 있으면 동봉된 고무 스페이서를 사용해 최대한 수직에 맞춰 부착하세요.",
              body=f"""<div class="center">{svg_vertical(1080)}</div>{VERTICAL_NOTE}"""),
         dict(title="카메라 부착 요령", cap="전방과 후방 카메라는 차량 중심선에, 좌우 카메라는 차량 길이의 중앙에 맞춥니다. 카메라 상단 삼각형 표시가 위를 향하게 하고, 브래킷으로 수직면에 단단히 고정합니다.",
-             body=f"""<div class="split"><div class="row2">{img("camera")}{img("bracket")}</div><div>{ul([
+             body=f"""<div class="split"><div class="row2">{img("camera", "카메라")}{img("bracket", "브래킷 · 고무 스페이서")}</div><div>{ul([
                  "전방·후방: 차량 <b>중심선(CL)</b> 위",
                  "좌·우: 차량 길이의 <b>50%</b> 지점, 좌우 동일 높이",
                  "카메라 상단 <b>▼ 표시가 위</b>를 향하도록",
@@ -69,7 +69,8 @@ INSTALL = dict(
                  "렌즈 시야를 차체·미러가 가리지 않는지 확인",
              ], "big")}</div></div>"""),
         dict(title="본체 포트 구성", cap="본체 앞면에는 전원 커넥터, USB 2.0, USB 3.0, 마이크로 SD 슬롯이 있고, 뒷면에는 카메라 커넥터, HDMI, 딥 스위치가 있습니다.",
-             body=f"""<div class="stack">{img("box_front", "앞면: 전원 커넥터(파랑 24핀) · USB 2.0 · USB 3.0 · MicroSD")}{img("box_rear", "뒷면: 카메라 커넥터(흰색 16핀) · HDMI · DIP 스위치")}</div>"""),
+             body=f"""<div class="stack">{marked("box_front", [dict(x=.285, y=.42, w=.18, h=.40, kind="box", d="s", len=26, label="전원 24핀"), dict(x=.475, y=.45, w=.08, h=.26, kind="box", d="s", len=26, label="USB 2.0"), dict(x=.61, y=.45, w=.07, h=.26, kind="box", d="n", len=22, label="USB 3.0"), dict(x=.73, y=.48, w=.07, h=.18, kind="box", d="e", len=40, label="MicroSD")], width=560, pad=30)}
+{marked("box_rear", [dict(x=.255, y=.42, w=.14, h=.42, kind="box", d="s", len=26, label="카메라 16핀"), dict(x=.46, y=.48, w=.10, h=.25, kind="box", d="s", len=26, label="HDMI"), dict(x=.79, y=.48, w=.08, h=.22, kind="box", d="e", len=40, label="DIP")], width=560, pad=30)}</div>"""),
         dict(title="전체 연결 개요", cap="전체 연결은 이렇습니다. 네 대의 카메라는 연장 케이블과 젠더 케이블을 거쳐 카메라 커넥터로, 전원 케이블은 전원 커넥터로, 모니터는 영상 출력과 USB로 연결합니다.",
              body=f'<div class="center">{svg_connect(1180)}</div>'),
         dict(title="카메라 연결", cap="카메라 젠더 케이블을 본체 뒷면의 16핀 카메라 커넥터에 딸깍 소리가 나도록 끼웁니다. 네 갈래의 FRONT, REAR, LEFT, RIGHT 라벨을 확인해 같은 위치 카메라의 연장 케이블과 연결합니다.",

@@ -32,7 +32,7 @@ figcaption { font-size: 16px; color: #495057; margin-top: 6px; text-align: cente
 .split figure img { max-height: 400px; }
 .row2, .row3 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: center; }
 .row3 { grid-template-columns: 1fr 1fr 1fr; }
-.row2 img { max-height: 330px; }
+.row2 img { max-height: 290px; }
 .row3 img { max-height: 110px; }
 .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 18px; height: 100%; }
 .grid4 figure { background: #fff; border-radius: 12px; padding: 10px; }
