@@ -9,9 +9,9 @@ VERTICAL_BOX = f"""
 <div class="callout red">
   <div class="ct">⚠ 카메라는 반드시 수직면에 부착하십시오</div>
   <p>카메라 하우징에는 약 <b>42~45°의 하향(dip) 각도가 이미 내장</b>되어 있습니다.
-  차체의 <b>수직면(90°)에 평평하게 밀착</b>하여 부착하고, 쐐기(웨지) 브래킷·경사면 부착·임의 각도 조정은 하지 마십시오.
+  차체의 <b>수직면(90°)에 평평하게 밀착</b>하여 부착하십시오. 부착면이 경사져 있으면 경사면에 그대로 붙이지 말고, <b>동봉된 고무 스페이서를 사용해 최대한 수직에 맞춰</b> 부착하십시오.
   각도가 이중으로 적용되면 탑뷰가 왜곡되고 캘리브레이션이 실패합니다.</p>
-  <div class="center">{svg_vertical(430)}</div>
+  <div class="center">{svg_vertical(640)}</div>
 </div>"""
 
 
@@ -67,7 +67,7 @@ INSTALL = dict(slug="01_install", title="장착 설명서", html=cover(
 
 <h3>3-2. 부착 요령</h3>
 {ul([
-    "<b>카메라는 반드시 수직면에 밀착하여 부착</b> — 하향 42~45°는 하우징에 내장되어 있으므로 별도 각도를 주지 않습니다.",
+    "<b>카메라는 수직면에 밀착하여 부착</b> — 하향 42~45°는 하우징에 내장되어 있습니다. 경사면은 <b>동봉 고무 스페이서</b>로 최대한 수직을 맞춥니다.",
     "전방·후방 카메라는 차량 <b>중심선(CL)</b> 위에, 좌·우 카메라는 차량 길이의 <b>50%</b> 지점에 좌우 같은 높이로 부착합니다.",
     "카메라 상단의 <b>▼ 표시가 위</b>를 향하도록 부착합니다.",
     "제공된 카메라 장착 브래킷으로 흔들림 없이 고정하고, 렌즈 시야를 차체·미러·몰딩이 가리지 않는지 확인합니다.",
@@ -227,7 +227,7 @@ FIRMWARE = dict(slug="03_firmware", title="펌웨어 업데이트 설명서", ht
 <div class="g2">{img("sw_info", "S/W Information — “Version” V 바로 위 5번 터치")}{img("sw_update", "좌측 메뉴 하단에 Update 버튼 생성")}</div>
 {ul([
     "① 펌웨어 파일이 있는 USB를 본체 USB 포트(USB 2.0)에 연결합니다.",
-    "② 어라운드뷰 화면 하단 ⚙ → <b>Settings</b> 창에서 <b>S/W Information</b>(소프트웨어 정보) 창을 활성화합니다.",
+    "② 어라운드뷰 화면 왼쪽 메뉴의 <b>SETTING</b> → 설정 창에서 <b>S/W Information</b>(소프트웨어 정보) 창을 활성화합니다.",
     "③ <b>“Version” 글씨의 V 글자 바로 위쪽 영역을 5번 연속 터치</b>합니다.",
     "④ 좌측 메뉴 창 가장 하단에 <b>Update</b> 버튼이 생성됩니다.",
     "⑤ Update 버튼을 누르면 바로 업데이트가 시작됩니다 (SVM UPDATE 화면).",
@@ -255,7 +255,7 @@ OPERATION = dict(slug="04_operation", title="작동 설명서", html=cover(
 ])}
 
 <h2>2. 메인 화면</h2>
-<div class="g2">{img("ui_main", "좌측 메뉴: BACK · HOME · 3D VIEW · PARKING · REC · SETTING")}{img("set_mode", "하단 메뉴바: 상부감시 · 하부감시 · 후방 IR · 어라운드 · 상/하부 · 4분할 · ⚙")}</div>
+<div class="g2">{img("ui_main", "좌측 메뉴: BACK · HOME · 3D VIEW · PARKING · REC · SETTING")}{img("set_mode_nobar", "SETTING → 모드 설정 · 시스템 설정 · 비디오 리스트 · 소프트웨어 정보")}</div>
 
 <h2>3. 3D 뷰</h2>
 {table(["모드", "진입 방법", "화면 구성"], [

@@ -28,7 +28,7 @@ def ending(msg, nxt):
 </div>""")
 
 
-VERTICAL_NOTE = '<div class="warn big">⚠ 카메라는 반드시 <b>수직면</b>에 밀착하여 부착하십시오.</div>'
+VERTICAL_NOTE = '<div class="warn big">⚠ 카메라는 <b>수직면</b>에 부착 · 경사면은 <b>동봉 고무 스페이서</b>로 최대한 수직에 맞추십시오.</div>'
 
 # ============================================================================
 # 1. 장착
@@ -58,14 +58,14 @@ INSTALL = dict(
     ['<b style="color:#ae3ec9">RIGHT</b>', "6,000", "−1,248", "3,110"],
 ], "tbl")}
 <p class="note">원점: 후면 중앙 · 지면 / 좌우 카메라는 차량 길이의 50% 지점<br><b style="color:#c92a2a">허용 오차 ±30mm (자동 보정되지 않음)</b></p></div></div>"""),
-        dict(title="★ 가장 중요: 카메라는 수직면에 부착", cap="가장 중요한 점입니다. 카메라는 반드시 차체의 수직면에 밀착하여 부착합니다. 약 42~45°의 하향 각도가 하우징에 이미 내장되어 있으므로, 쐐기 브래킷이나 추가 각도 없이 평평하게 부착하세요.",
-             body=f"""<div class="center">{svg_vertical(900)}</div>{VERTICAL_NOTE}"""),
+        dict(title="★ 가장 중요: 카메라는 수직면에 부착", cap="가장 중요한 점입니다. 카메라는 차체의 수직면에 밀착하여 부착합니다. 약 42~45°의 하향 각도가 하우징에 이미 내장되어 있습니다. 부착면이 경사져 있으면 동봉된 고무 스페이서를 사용해 최대한 수직에 맞춰 부착하세요.",
+             body=f"""<div class="center">{svg_vertical(1080)}</div>{VERTICAL_NOTE}"""),
         dict(title="카메라 부착 요령", cap="전방과 후방 카메라는 차량 중심선에, 좌우 카메라는 차량 길이의 중앙에 맞춥니다. 카메라 상단 삼각형 표시가 위를 향하게 하고, 브래킷으로 수직면에 단단히 고정합니다.",
              body=f"""<div class="split"><div class="row2">{img("camera")}{img("bracket")}</div><div>{ul([
                  "전방·후방: 차량 <b>중심선(CL)</b> 위",
                  "좌·우: 차량 길이의 <b>50%</b> 지점, 좌우 동일 높이",
                  "카메라 상단 <b>▼ 표시가 위</b>를 향하도록",
-                 "<b>수직면에 밀착</b> — 틈·기울어짐 없이 고정",
+                 "<b>수직면에 밀착</b> · 경사면은 <b>고무 스페이서</b>로 수직 보정",
                  "렌즈 시야를 차체·미러가 가리지 않는지 확인",
              ], "big")}</div></div>"""),
         dict(title="본체 포트 구성", cap="본체 앞면에는 전원 커넥터, USB 2.0, USB 3.0, 마이크로 SD 슬롯이 있고, 뒷면에는 카메라 커넥터, HDMI, 딥 스위치가 있습니다.",
@@ -130,8 +130,8 @@ CALIB = dict(
                  "조명 균일, 강한 역광·그림자 X",
                  "패턴 주변 간섭 물체 X",
              ], "big")}</div></div>"""),
-        dict(title="사전 확인: 카메라 부착 상태", cap="캘리브레이션 전에 카메라가 수직면에 규정 위치로 부착되어 있는지 확인합니다. 위치 오차 ±30mm를 넘거나 기울어진 장착은 캘리브레이션으로 보정되지 않습니다.",
-             body=f"""<div class="center">{svg_vertical(760)}</div>{VERTICAL_NOTE}"""),
+        dict(title="사전 확인: 카메라 부착 상태", cap="캘리브레이션 전에 카메라가 수직으로(경사면은 고무 스페이서로 보정) 규정 위치에 부착되어 있는지 확인합니다. 위치 오차 ±30mm를 넘거나 기울어진 장착은 캘리브레이션으로 보정되지 않습니다.",
+             body=f"""<div class="center">{svg_vertical(1000)}</div>{VERTICAL_NOTE}"""),
         dict(title="Step 1. 보정판 설치", cap="전방과 후방 보정판은 차량 범퍼에서 패턴 시작점까지 0.5m 떨어뜨립니다. 좌우 보정판은 전방 패턴 시작점에서 사이드 패턴 시작점까지 3m 위치에 놓습니다.",
              body=f"""<div class="split"><div class="center">{img("cal_layout", cls="tall")}</div><div>{ul([
                  "전·후방 보정판: 범퍼 → 패턴 시작점 <b class='red'>0.5m</b>",
@@ -147,7 +147,7 @@ CALIB = dict(
                  "④ 어라운드뷰 화면에서 Calibration Tool 활성화",
              ], "big steps")}</div></div>"""),
         dict(title="Calibration 메뉴", cap="메뉴를 살펴봅니다. Cam view는 기본 보정 화면, Params는 차량 전장 입력, Apply는 저장, Smart는 상용차 모드, Detect는 보정 실행, Load Master는 USB의 차량 모델 불러오기입니다.",
-             body=f"""<div class="split"><div>{marked("cal_menubar", [dict(x=.145, y=.17, w=.25, h=.20, kind="box", badge="1"), dict(x=.375, y=.17, w=.20, h=.20, kind="box", badge="2"), dict(x=.10, y=.40, w=.17, h=.18, kind="box", badge="3"), dict(x=.32, y=.41, w=.16, h=.18, kind="box", badge="4"), dict(x=.434, y=.81, w=.075, h=.20, kind="box", badge="5"), dict(x=.58, y=.82, w=.155, h=.20, kind="box", badge="6"), dict(x=.82, y=.82, w=.31, h=.20, kind="box", badge="7")], width=560, cap="Calibration 화면 좌측 상단 메뉴 (확대)")}</div><div>{table(["#", "버튼", "기능"], [
+             body=f"""<div class="split"><div>{marked("cal_menubar", [dict(x=.145, y=.17, w=.25, h=.20, kind="box", badge="1"), dict(x=.375, y=.17, w=.20, h=.20, kind="box", badge="2"), dict(x=.10, y=.40, w=.17, h=.18, kind="box", badge="3"), dict(x=.32, y=.41, w=.16, h=.18, kind="box", badge="4"), dict(x=.434, y=.81, w=.075, h=.20, kind="box", badge="5"), dict(x=.58, y=.82, w=.155, h=.20, kind="box", badge="6"), dict(x=.82, y=.82, w=.31, h=.20, kind="box", badge="7")], width=560, cap="Calibration 화면 좌측 상단 메뉴 (확대 재구성)")}</div><div>{table(["#", "버튼", "기능"], [
                  ["1", "Cam view", "기본 보정 화면"], ["2", "Params", "차량 전장(길이) 입력"], ["3", "Close", "Calibration Tool 닫기"],
                  ["4", "Apply", "적용 차량·Calibration 저장"], ["5", "Smart ▼ / 0x4", "상용차 Smart / 승용차 0x4"],
                  ["6", "Detect", "Calibration 실행"], ["7", "Load Master", "USB의 차량 모델 불러오기"]], "tbl sm")}</div></div>"""),
@@ -162,7 +162,7 @@ CALIB = dict(
              body=f"""<div class="split"><div class="center">{marked("cal_paramsbar", [
                  dict(x=.197, y=.13, w=.13, h=.22, kind="box", d="e", len=120, label="① Params"),
                  dict(x=.55, y=.80, w=.30, h=.22, kind="box", d="s", len=30, label="② 차량 길이 입력 (mm)")], width=580, pad=40)}
-{marked("cal_params", [dict(x=.36, y=.38, w=.42, h=.30, kind="box", d="s", len=40, label="터치 드래그로 조절")], width=420, pad=20)}</div><div>{ul([
+{marked("cal_params", [dict(x=.36, y=.38, w=.42, h=.30, kind="box", d="s", len=40, label="터치 드래그로 조절")], width=370, pad=20, cap="실제 화면")}</div><div>{ul([
                  "C. <b>Params</b> → <b>Vehicle Length</b>",
                  "실제 차량 전장 입력 (mm)",
                  "터치 드래그로 길이 조절 가능",
@@ -211,12 +211,9 @@ FIRMWARE = dict(
                  "모니터 터치 USB는 그대로 (다른 포트)",
                  "인식 안 되면 다른 USB 포트로 재시도",
              ], "big")}</div></div>"""),
-        dict(title="② S/W Information 열기", cap="어라운드뷰 화면 오른쪽 아래 설정 아이콘을 눌러 Settings로 들어간 뒤 S/W Information(소프트웨어 정보) 창을 엽니다.",
-             body=f"""<div class="split"><div>{marked("set_mode", [dict(x=.925, y=.92, d="n", len=70, label="① 설정"),
-                 dict(x=.20, y=.75, w=.32, h=.14, kind="box", d="e", len=90, label="② 소프트웨어 정보")], width=580, pad=20)}</div><div>{ul([
-                 "하단 메뉴바 ⚙ <b>설정</b>",
-                 "<b>S/W Information</b> (소프트웨어 정보) 선택",
-             ], "big steps")}</div></div>"""),
+        dict(title="② S/W Information 열기", cap="어라운드뷰 화면 왼쪽 메뉴의 SETTING 버튼을 눌러 설정으로 들어간 뒤 S/W Information(소프트웨어 정보) 창을 엽니다.",
+             body=f"""<div class="split"><div>{marked("ui_main", [dict(x=.05, y=.90, d="e", len=70, label="① SETTING")], width=580, cap="왼쪽 메뉴 SETTING")}</div><div>{marked("set_mode_nobar", [dict(x=.20, y=.90, w=.32, h=.17, kind="box", d="e", len=90, label="② 소프트웨어 정보")], width=580, cap="설정 화면")}</div></div>
+{ul(["① 왼쪽 메뉴 <b>SETTING</b> → ② <b>S/W Information</b> (소프트웨어 정보)"], "inline")}"""),
         dict(title="③ 숨은 메뉴: Version 위 5번 터치", cap="“Version” 글자에서 V 바로 위쪽 영역을 5번 연속으로 터치합니다. 그러면 좌측 메뉴 가장 아래에 Update 버튼이 나타납니다.",
              body=f"""<div class="split"><div>{marked("sw_info", [dict(x=.475, y=.175, w=.08, h=.09, kind="box", d="e", len=150, label="V 바로 위 5번 터치")], width=580, cap="“Version” 의 V 바로 위 → 5번 연속 터치")}</div><div>{marked("sw_update", [dict(x=.16, y=.92, w=.27, h=.13, kind="box", d="e", len=110, label="Update 생성")], width=580, cap="좌측 메뉴 하단에 Update 생성")}</div></div>"""),
         dict(title="④ Update 실행", cap="Update 버튼을 누르면 바로 업데이트가 시작됩니다. SVM UPDATE 화면이 나오는 동안 절대 전원을 끄지 마십시오.",
@@ -252,10 +249,12 @@ OPERATION = dict(
                  "MicroSD <b>상시·이벤트 녹화</b>",
                  "<b>사람·차량 감지</b> 알림",
              ], "big")}</div></div>"""),
-        dict(title="메인 화면 구성", cap="왼쪽 메뉴에는 뒤로, 홈, 3D 뷰, 주차, 녹화, 설정 버튼이 있습니다. 화면을 터치하면 하단 메뉴바가 나타나 상부 감시, 하부 감시, 후방, 어라운드, 4분할 화면을 고를 수 있습니다.",
-             body=f"""<div class="split"><div>{marked("ui_main", [dict(x=.05, y=.42, d="e", len=60, label="3D VIEW"),
-                 dict(x=.05, y=.74, d="e", len=60, label="REC 녹화"), dict(x=.05, y=.90, d="e", len=60, label="SETTING")], width=560, cap="좌측 메뉴")}</div><div>{marked("set_mode", [dict(x=.45, y=.92, w=.88, h=.14, kind="box", d="n", len=50, label="하단 메뉴바")], width=560, pad=10, cap="하단 메뉴바")}
-{ul(["BACK · HOME · 3D VIEW · PARKING · REC · SETTING", "하단: 상부감시 · 하부감시 · 후방 · 어라운드 · 상/하부 · 4분할"], "sm")}</div></div>"""),
+        dict(title="메인 화면 구성", cap="왼쪽 메뉴에는 뒤로, 홈, 3D 뷰, 주차, 녹화, 설정 버튼이 있습니다. 설정 버튼을 누르면 모드 설정, 시스템 설정, 비디오 리스트, 소프트웨어 정보 메뉴가 나옵니다.",
+             body=f"""<div class="split"><div>{marked("ui_main", [dict(x=.05, y=.08, d="e", len=50, label="뒤로"),
+                 dict(x=.05, y=.25, d="e", len=50, label="홈"), dict(x=.05, y=.42, d="e", len=50, label="3D 뷰"),
+                 dict(x=.05, y=.58, d="e", len=50, label="주차"), dict(x=.05, y=.74, d="e", len=50, label="녹화"),
+                 dict(x=.05, y=.90, d="e", len=50, label="설정")], width=580, cap="좌측 메뉴")}</div><div>{marked("set_mode_nobar", [dict(x=.20, y=.55, w=.38, h=.88, kind="box")], width=540, cap="설정 화면")}
+{ul(["BACK · HOME · 3D VIEW · PARKING · REC · SETTING", "설정: 모드 설정 · 시스템 설정 · 비디오 리스트 · 소프트웨어 정보"], "sm")}</div></div>"""),
         dict(title="3D 뷰", cap="3D 뷰에서는 전방, 좌측 후방, 우측 후방, 후방, 트레일러, 전방 세차 뷰를 볼 수 있습니다. 설정에서 3D 모드를 선택하고 화면을 터치해 조작합니다.",
              body=f"""<div class="grid3">{marked("ui_3d", [dict(x=.05, y=.42, d="e", len=44, label="3D 뷰")], width=370, cap="3D 전방")}{img("ui_3d_rl", "3D 좌측 후방")}{img("ui_trailer", "3D 트레일러")}</div>
 <p class="note center">전방 · 좌측 후방 · 우측 후방 · 후방 · 후방 트레일러 · 전방 세차 뷰</p>"""),

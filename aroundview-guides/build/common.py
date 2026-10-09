@@ -42,11 +42,12 @@ def chip(color, label):
 # 도식: 카메라 수직면 부착
 # --------------------------------------------------------------------------
 def svg_vertical(width=560):
+    """카메라 부착 도식: ✔ 수직면 / ✘ 경사면 그대로 / ✔ 경사면 + 동봉 고무 스페이서로 수직 보정."""
     return f"""
-<svg viewBox="0 0 560 300" width="{width}" xmlns="http://www.w3.org/2000/svg" font-family="NanumSquare, NanumGothic">
-  <!-- OK -->
+<svg viewBox="0 0 840 300" width="{width}" xmlns="http://www.w3.org/2000/svg" font-family="NanumSquare, NanumGothic">
+  <!-- ① 수직면 -->
   <rect x="0" y="0" width="270" height="300" rx="14" fill="#eaf7ee"/>
-  <text x="135" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="#1b7a3a">✔ 올바른 부착</text>
+  <text x="135" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="#1b7a3a">✔ 수직면에 밀착</text>
   <rect x="60" y="50" width="16" height="230" fill="#555"/>
   <text x="50" y="170" font-size="13" fill="#333" transform="rotate(-90 50 170)" text-anchor="middle">차체 수직면 (90°)</text>
   <rect x="76" y="110" width="34" height="46" rx="6" fill="#222"/>
@@ -57,16 +58,28 @@ def svg_vertical(width=560):
   <path d="M170 140 A70 70 0 0 1 150 190" fill="none" stroke="#e03131" stroke-width="2.5"/>
   <text x="178" y="178" font-size="17" font-weight="800" fill="#e03131">42~45°</text>
   <text x="175" y="75" text-anchor="middle" font-size="13" fill="#333">하향 각도는 하우징에 내장</text>
-  <!-- NG -->
-  <rect x="290" y="0" width="270" height="300" rx="14" fill="#fdecec"/>
-  <text x="425" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="#c92a2a">✘ 잘못된 부착</text>
-  <line x1="340" y1="50" x2="372" y2="215" stroke="#555" stroke-width="16"/>
-  <text x="440" y="80" text-anchor="middle" font-size="13" fill="#333">경사면 / 쐐기(웨지) 브래킷</text>
-  <polygon points="380,120 410,112 418,160 388,168" fill="#888"/>
-  <rect x="410" y="112" width="30" height="44" rx="6" fill="#222" transform="rotate(-12 425 134)"/>
-  <line x1="430" y1="140" x2="485" y2="225" stroke="#c92a2a" stroke-width="2.5" stroke-dasharray="6 5"/>
-  <text x="425" y="258" text-anchor="middle" font-size="14" fill="#c92a2a" font-weight="700">하향 각도 이중 적용 →</text>
-  <text x="425" y="280" text-anchor="middle" font-size="14" fill="#c92a2a" font-weight="700">탑뷰 왜곡 · 보정 실패</text>
+  <!-- ② 경사면에 그대로 부착 -->
+  <rect x="285" y="0" width="270" height="300" rx="14" fill="#fdecec"/>
+  <text x="420" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="#c92a2a">✘ 경사면에 그대로 부착</text>
+  <line x1="335" y1="50" x2="367" y2="215" stroke="#555" stroke-width="16"/>
+  <rect x="368" y="112" width="34" height="46" rx="6" fill="#222" transform="rotate(-11 385 135)"/>
+  <circle cx="392" cy="140" r="9" fill="#c92a2a"/>
+  <line x1="392" y1="140" x2="470" y2="250" stroke="#c92a2a" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <text x="452" y="78" text-anchor="middle" font-size="12.5" fill="#333">카메라가 경사를 따라 기울어짐</text>
+  <text x="420" y="262" text-anchor="middle" font-size="14" fill="#c92a2a" font-weight="700">각도 틀어짐 →</text>
+  <text x="420" y="282" text-anchor="middle" font-size="14" fill="#c92a2a" font-weight="700">탑뷰 왜곡 · 보정 실패</text>
+  <!-- ③ 경사면 + 고무 스페이서 -->
+  <rect x="570" y="0" width="270" height="300" rx="14" fill="#eaf7ee"/>
+  <text x="705" y="30" text-anchor="middle" font-size="19" font-weight="800" fill="#1b7a3a">✔ 고무 스페이서로 보정</text>
+  <line x1="610" y1="50" x2="642" y2="215" stroke="#555" stroke-width="16"/>
+  <polygon points="633,104 650,104 650,166 645,166" fill="#f08c00"/>
+  <rect x="650" y="110" width="34" height="46" rx="6" fill="#222"/>
+  <circle cx="674" cy="140" r="9" fill="#2f7cf6"/>
+  <line x1="674" y1="140" x2="790" y2="256" stroke="#2f7cf6" stroke-width="2.5" stroke-dasharray="6 5"/>
+  <line x1="650" y1="92" x2="650" y2="182" stroke="#1b7a3a" stroke-width="2" stroke-dasharray="4 4"/>
+  <text x="705" y="76" text-anchor="middle" font-size="13" fill="#333">동봉 고무 스페이서(주황)</text>
+  <text x="725" y="262" text-anchor="middle" font-size="14" fill="#1b7a3a" font-weight="700">최대한 수직(90°)에</text>
+  <text x="725" y="282" text-anchor="middle" font-size="14" fill="#1b7a3a" font-weight="700">맞춰 부착</text>
 </svg>"""
 
 
